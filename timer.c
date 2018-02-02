@@ -90,12 +90,24 @@ void
 timer_sleep (int64_t ticks)
 {
   int64_t start = timer_ticks ();
+  //struct thread *t = getcurrentthread();
+  //ct = getticks();
+  //wakeuptime = ct + sec;
+  // t-> wakeuptime = wt;
+  //insert_into_queue(current_thread)
+  //sema_down
+
+
+  //Struct thread (thread.h) int wakeuptime
 
   ASSERT (intr_get_level () == INTR_ON);
   while (timer_elapsed (start) < ticks) //Get rid of the following
                                         //Wait number of ticks (int64_t)
                                         //Implement a ready queue *POSSIBLY*
-    thread_yield ();
+    thread_yield (); //Problem. Does not specify what is Voluntarily giving up
+                      //Constanly checking if there is a problem or not
+                      //thread_block (); or sema_down();
+                      //thread_unblock from scheduler
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be

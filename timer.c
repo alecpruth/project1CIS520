@@ -110,6 +110,18 @@ timer_sleep (int64_t ticks)
                       //thread_unblock from scheduler
 }
 
+void
+my_timer_sleep (int64_t ticks)
+{
+  int64_t start = timer_ticks ();
+
+  ASSERT (intr_get_level () == INTR_ON);
+  while (timer_elapsed (start) < ticks) //Get rid of the following
+                                        //Wait number of ticks (int64_t)
+                                        //Implement a ready queue *POSSIBLY*
+    thread_yield ();
+}
+
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
    turned on. */
 void

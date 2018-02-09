@@ -5,8 +5,6 @@
 #include <list.h>
 #include <stdint.h>
 
-#define TIME_EVENT 0  
-
 /* States in a thread's life cycle. */
 enum thread_status
   {
@@ -91,8 +89,8 @@ struct thread
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
-    int64_t wakeup_ticks;               // wakeuptime for threads
-    uint64_t waiting_for;               // what ever the thread is waiting for
+    int64_t wakeup_ticks;
+    int8_t  waiting_for;
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */

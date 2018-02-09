@@ -2,7 +2,7 @@
 
 # Test names.
 tests/threads_TESTS = $(addprefix tests/threads/,alarm-single		\
-alarm-many my_alarm alarm-multiple alarm-simultaneous alarm-priority alarm-zero alarm-mega	\
+alarm-multiple alarm-mega my-alarm alarm-simultaneous alarm-priority alarm-zero		\
 alarm-negative priority-change priority-donate-one			\
 priority-donate-multiple priority-donate-multiple2			\
 priority-donate-nest priority-donate-sema priority-donate-lower		\
@@ -16,9 +16,9 @@ tests/threads_SRC  = tests/threads/tests.c
 tests/threads_SRC += tests/threads/alarm-wait.c
 tests/threads_SRC += tests/threads/alarm-simultaneous.c
 tests/threads_SRC += tests/threads/alarm-priority.c
-tests/threads_SRC += tests/threads/my_alarm.c
 tests/threads_SRC += tests/threads/alarm-zero.c
 tests/threads_SRC += tests/threads/alarm-negative.c
+tests/threads_SRC += tests/threads/my-alarm.c
 tests/threads_SRC += tests/threads/priority-change.c
 tests/threads_SRC += tests/threads/priority-donate-one.c
 tests/threads_SRC += tests/threads/priority-donate-multiple.c
@@ -51,3 +51,4 @@ tests/threads/mlfqs-block.output
 
 $(MLFQS_OUTPUTS): KERNELFLAGS += -mlfqs
 $(MLFQS_OUTPUTS): TIMEOUT = 480
+

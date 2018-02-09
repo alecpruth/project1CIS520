@@ -6,10 +6,9 @@ void run_test (const char *);
 typedef void test_func (void);
 
 extern test_func test_alarm_single;
-extern test_func test_my_alarm;
 extern test_func test_alarm_multiple;
-extern test_func test_alarm_many;
 extern test_func test_alarm_mega;
+extern test_func test_my_alarm;
 extern test_func test_alarm_simultaneous;
 extern test_func test_alarm_priority;
 extern test_func test_alarm_zero;
@@ -41,3 +40,4 @@ void fail (const char *, ...);
 void pass (void);
 
 #endif /* tests/threads/tests.h */
+

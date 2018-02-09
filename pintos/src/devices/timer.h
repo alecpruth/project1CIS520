@@ -10,15 +10,15 @@
 void timer_init (void);
 void timer_calibrate (void);
 
-int64_t timer_ticks(void);
+int64_t timer_ticks (void);
 int64_t timer_elapsed (int64_t);
 
 /* Sleep and yield the CPU to other threads. */
 void timer_sleep (int64_t ticks);
+void my_timer_sleep(uint64_t ticks);
 void timer_msleep (int64_t milliseconds);
 void timer_usleep (int64_t microseconds);
 void timer_nsleep (int64_t nanoseconds);
-void my_timer_sleep(int64_t ticks);
 
 /* Busy waits. */
 void timer_mdelay (int64_t milliseconds);
@@ -27,4 +27,4 @@ void timer_ndelay (int64_t nanoseconds);
 
 void timer_print_stats (void);
 
-#endif /* devices/timer.h */
+#endif /* devices/timer.h  */

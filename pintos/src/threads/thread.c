@@ -147,6 +147,17 @@ thread_print_stats (void)
           idle_ticks, kernel_ticks, user_ticks);
 }
 
+bool 
+compare_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED){
+    struct thread *threadA = list_entry(a, struct thread, elem);
+    struct thread *threadB = list_entry(b, struct thread, elem);
+    if (threadA -> priority > threadB->priority)
+    {
+        return true;
+    }
+    return false;
+}
+
 /* Creates a new kernel thread named NAME with the given initial
    PRIORITY, which executes FUNCTION passing AUX as the argument,
    and adds it to the ready queue.  Returns the thread identifier
@@ -492,9 +503,26 @@ next_thread_to_run (void)
 {
   if (list_empty (&ready_list))
     return idle_thread;
-  else
-    return list_entry (list_pop_front (&ready_list), struct thread, elem); //make own function to replace list_pop_front change this return largest element 
+  else{
+    //list_sort(&ready_list);
+    return list_entry (list_pop_front (&ready_list), struct thread, elem);
+    } //make own function to replace list_pop_front change this return largest element 
+    //list_sort sorts ready 
+    
+    
 }
+
+struct list_elem *
+my_list_pop_front (struct list *list){
+  struct list_elem *front = my_list_max(list,compare_priority,NULL);
+  //struct list_elem *back = list_back(list);
+  
+  
+  list_remove (front);
+  return front;
+}
+
+
 
 /* Completes a thread switch by activating the new thread's page
    tables, and, if the previous thread is dying, destroying it.

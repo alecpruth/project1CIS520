@@ -166,7 +166,9 @@ my_timer_sleep (uint64_t ticks)
   
   enum intr_level old_level = intr_disable ();
   my_list_insert(blocked_queue, curr_thread);
-  thread_block();
+  
+  sema_init(&curr_thread->timeevent_sema, 0);
+  sema_down(&curr_thread->timeevent_sema);
   intr_set_level (old_level); 
   
 }
@@ -257,7 +259,8 @@ timer_interrupt (struct intr_frame *args UNUSED)
         if(next_thread->status == THREAD_BLOCKED) {
             if(ticks >= next_thread->wakeup_ticks) {
                 printf("timer_interrupt(): Thread ready to be unblocked\n");
-                thread_unblock(next_thread);
+                sema_up(&next_thread->timeevent_sema);
+                //thread_unblock(next_thread);
                 my_list_remove(blocked_queue, next_thread);
             }
         }

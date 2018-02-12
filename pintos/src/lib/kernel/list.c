@@ -1,5 +1,6 @@
 #include "list.h"
 #include "../debug.h"
+#include "threads/thread.h"
 
 /* Our doubly linked lists have two header elements: the "head"
    just before the first element and the "tail" just after the
@@ -85,10 +86,10 @@ list_next (struct list_elem *elem)
   return elem->next;
 }
 
-/* Returns LIST's tail.
-
+/* 
    list_end() is often used in iterating through a list from
-   front to back.  See the big comment at the top of list.h for
+   front to back.  See the big comment at the top of list.h forReturns LIST's tail.
+
    an example. */
 struct list_elem *
 list_end (struct list *list)
@@ -500,7 +501,29 @@ list_insert_ordered (struct list *list, struct list_elem *elem,
   return list_insert (e, elem);
 }
 
-/* Iterates through LIST and removes all but the first in each
+void
+list_priority_insert(struct list *list, struct list_elem *el)
+{
+  struct list_elem *e;
+  const struct thread *existing;
+  const struct thread *new;
+
+  ASSERT (list != NULL);
+  ASSERT (el != NULL);
+  
+  for (e = list_begin (list); e != list_end (list); e = list_next (e)) {
+    
+    existing = list_entry(e, struct thread, elem);
+    new = list_entry(el, struct thread, elem);
+    
+    if( new->priority > existing->priority )
+        break;
+   }
+
+  return list_insert (e, el);
+}
+
+/* Iterates through LIST and removes all but the first in eachor
    set of adjacent elements that are equal according to LESS
    given auxiliary data AUX.  If DUPLICATES is non-null, then the
    elements from LIST are appended to DUPLICATES. */

@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -80,6 +81,10 @@ typedef int tid_t;
    only because they are mutually exclusive: only a thread in the
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
+   
+#ifndef THREAD__
+#define THREAD__
+
 struct thread
   {
     /* Owned by thread.c. */
@@ -91,6 +96,7 @@ struct thread
     struct list_elem allelem;           /* List element for all threads list. */
     int64_t wakeup_ticks;
     int8_t  waiting_for;
+    struct semaphore timeevent_sema;
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
@@ -101,8 +107,10 @@ struct thread
 #endif
 
     /* Owned by thread.c. */
-    unsigned magic;                     /* Detects stack overflow. */
+    unsigned magic;                     /* Detects stack overflow */ 
   };
+  
+#endif
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.

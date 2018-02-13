@@ -23,52 +23,7 @@
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
 
-struct thread * blocked_queue[10] = {0,0,0,0,0,0,0,0,0,0};
-
-
-void my_list_insert(struct thread *list[], struct thread *t)
-{
-
-    for(int i=0; i<10; i++)
-    {
-        
-        if(list[i] == THREAD_PTR_NULL)
-        {
-            list[i] = t;
-            break;
-        }
-    }
-}
-
-void my_list_remove(struct thread *list[], struct thread *t)
-{
-    for(int i=0; i<10; i++)
-    {
-        if( list[i]->tid == t->tid)
-        {
-            list[i] = THREAD_PTR_NULL; // 0 indicates blank position
-            break;
-        }
-    }
-
-}
-
-struct thread * my_list_pop(struct thread *list[])
-{
-static int count = 0;
-
-    while( count < 10)
-    {
-        if( list[count] != THREAD_PTR_NULL )
-        {
-            return list[count++];
-        }
-        count++;
-    }
-    count = 0;
-    return THREAD_PTR_NULL;
-
-}
+struct list blocked_list;
 
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
@@ -87,6 +42,7 @@ timer_init (void)
 {
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
+  list_init(&blocked_list);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -165,8 +121,8 @@ my_timer_sleep (uint64_t ticks)
   ASSERT (intr_get_level () == INTR_ON);
   
   enum intr_level old_level = intr_disable ();
-  my_list_insert(blocked_queue, curr_thread);
   
+  list_wakeup_ticks_insert(&blocked_list, &curr_thread->wait_elem);
   sema_init(&curr_thread->timeevent_sema, 0);
   sema_down(&curr_thread->timeevent_sema);
   intr_set_level (old_level); 
@@ -248,8 +204,28 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   struct thread * next_thread;
+  struct list_elem * el;
+  
   ticks++;
   thread_tick ();
+  
+  
+  while( !list_empty(&blocked_list) ) {
+      el = list_pop_front(&blocked_list);
+      
+        next_thread = list_entry(el, struct thread, wait_elem);
+        
+        if( ticks < next_thread->wakeup_ticks) {
+           list_push_front(&blocked_list, el);
+           break; 
+        }
+            printf("timer_interrupt(): Thread ready to be unblocked\n");
+            sema_up(&next_thread->timeevent_sema);
+  }
+  
+      
+  
+  /*
   
   next_thread = my_list_pop(blocked_queue);
   if(next_thread != THREAD_PTR_NULL)
@@ -266,6 +242,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
         }
       }
   }
+  */
   
 }
 

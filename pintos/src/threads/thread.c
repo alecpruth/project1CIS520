@@ -211,6 +211,15 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
+  
+  /*
+  struct thread *curr_thread = thread_current();
+  if(t->priority > curr_thread->prioriy)
+  {
+      schedule();
+  }
+  */ 
+  
 
   return tid;
 }

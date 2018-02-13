@@ -523,6 +523,28 @@ list_priority_insert(struct list *list, struct list_elem *el)
   return list_insert (e, el);
 }
 
+void
+list_wakeup_ticks_insert(struct list *list, struct list_elem *el)
+{
+  struct list_elem *e;
+  const struct thread *existing;
+  const struct thread *new;
+
+  ASSERT (list != NULL);
+  ASSERT (el != NULL);
+  
+  for (e = list_begin (list); e != list_end (list); e = list_next (e)) {
+    
+    existing = list_entry(e, struct thread, elem);
+    new = list_entry(el, struct thread, elem);
+    
+    if( new->wakeup_ticks > existing->wakeup_ticks )
+        break;
+   }
+
+  return list_insert (e, el);
+}
+
 /* Iterates through LIST and removes all but the first in eachor
    set of adjacent elements that are equal according to LESS
    given auxiliary data AUX.  If DUPLICATES is non-null, then the

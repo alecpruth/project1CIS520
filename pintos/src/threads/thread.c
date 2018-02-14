@@ -20,6 +20,8 @@
    of thread.h for details. */
 #define THREAD_MAGIC 0xcd6abf4b
 
+#define THREAD_PTR_NULL (struct thread *)0
+
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
@@ -212,13 +214,12 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
   
-  /*
+
   struct thread *curr_thread = thread_current();
-  if(t->priority > curr_thread->prioriy)
+  if(t->priority > curr_thread->priority)
   {
-      schedule();
+      thread_yield();
   }
-  */ 
   
 
   return tid;
@@ -357,7 +358,14 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+  struct thread * thread_curr = thread_current();
+  thread_curr->priority = new_priority;
+  // Implement priority donation to all the donee thread
+   //if(thread_curr->donee != THREAD_PTR_NULL) {
+     //donate_priority(thread_curr, thread_curr->donee);
+    //}
+   
+  // Make sure that the old_priority is updated only once
 }
 
 /* Returns the current thread's priority. */
@@ -622,3 +630,17 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+
+void donate_priority(struct thread *donor_thread, struct thread *donee_thread)
+{
+    donee_thread->old_priority = donee_thread->priority;
+    donee_thread->priority = donor_thread->priority;
+    donor_thread->donee = donee_thread;
+    donee_thread->donor = donor_thread;
+    
+    // Check if the donee thread has the highest priority amongst the threads in the ready queue and execute it right aways
+    
+}
+
+

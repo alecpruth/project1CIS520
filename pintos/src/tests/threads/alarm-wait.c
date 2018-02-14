@@ -175,22 +175,24 @@ my_test_sleep (int thread_cnt, int iterations)
 
   /* Start threads. */
   ASSERT (output != NULL);
+  uint8_t PRIORITY;
   for (i = 0; i < thread_cnt; i++)
     {
       struct sleep_thread *t = threads + i;
       char name[16];
       
+      PRIORITY = (i+1)*2;
       t->test = &test;
       t->id = i;
       t->duration = (i + 1) * 10;
       t->iterations = 0;
 
       snprintf (name, sizeof name, "thread %d", i);
-      thread_create (name, PRI_DEFAULT, sleeper, t);
+      thread_create (name, PRIORITY, sleeper, t);
     }
   
   /* Wait long enough for all the threads to finish. */
-  my_timer_sleep (100 + thread_cnt * iterations * 10 + 100);
+  timer_sleep (100 + thread_cnt * iterations * 10 + 100);
 
   /* Acquire the output lock in case some rogue thread is still
      running. */

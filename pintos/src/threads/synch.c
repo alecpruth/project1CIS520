@@ -32,6 +32,9 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
+
+#define THREAD_PTR_NULL (struct thread *)0
+
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
    manipulating it:
@@ -68,7 +71,7 @@ sema_down (struct semaphore *sema)
   old_level = intr_disable ();
   while (sema->value == 0) 
     {
-      list_push_back (&sema->waiters, &thread_current ()->elem);
+      list_priority_insert(&sema->waiters, &thread_current ()->elem);
       thread_block ();
     }
   sema->value--;
@@ -196,10 +199,16 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
+   //if( sema_try_down(&lock->semaphore) == 0) {
+     //  if(lock->holder->priority <= thread_current()->priority) {
+       // donate_priority(thread_current(), lock->holder);
+        //}
+    //}
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
+  // Possible site for priority donation
 }
-
+  
 /* Tries to acquires LOCK and returns true if successful or false
    on failure.  The lock must not already be held by the current
    thread.
@@ -232,6 +241,12 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
 
   lock->holder = NULL;
+  
+    if(thread_current()->donor != THREAD_PTR_NULL) {
+        thread_current()->donor->donee = THREAD_PTR_NULL;
+        thread_set_priority(thread_current()->old_priority);
+    }
+  
   sema_up (&lock->semaphore);
 }
 

@@ -214,13 +214,13 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
-  
-
+ 
   struct thread *curr_thread = thread_current();
   if(t->priority > curr_thread->priority)
   {
       thread_yield();
   }
+  
   
   return tid;
 }
@@ -496,7 +496,8 @@ init_thread (struct thread *t, const char *name, int priority)
 
   old_level = intr_disable ();
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  list_push_back (&all_list, &t->allelem);
+  //list_push_back (&all_list, &t->allelem);
+  list_priority_insert (&all_list, &t->allelem);
   intr_set_level (old_level);
 }
 
@@ -638,8 +639,8 @@ void donate_priority(struct thread *donor_thread, struct thread *donee_thread)
     donee_thread->priority = donor_thread->priority;
     donor_thread->donee = donee_thread;
     donee_thread->donor = donor_thread;
-    
-    // Check if the donee thread has the highest priority amongst the threads in the ready queue and execute it right aways
+
+    // Check if the donee thread has the highest priority amongst the threads in the ready queue and execute it right away
     
 }
 

@@ -149,6 +149,7 @@ thread_print_stats (void)
           idle_ticks, kernel_ticks, user_ticks);
 }
 
+// possible implementation to find priority, have not used 
 bool 
 compare_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED){
     struct thread *threadA = list_entry(a, struct thread, elem);
@@ -221,7 +222,6 @@ thread_create (const char *name, int priority,
       thread_yield();
   }
   
-
   return tid;
 }
 
@@ -361,9 +361,9 @@ thread_set_priority (int new_priority)
   struct thread * thread_curr = thread_current();
   thread_curr->priority = new_priority;
   // Implement priority donation to all the donee thread
-   //if(thread_curr->donee != THREAD_PTR_NULL) {
-     //donate_priority(thread_curr, thread_curr->donee);
-    //}
+   if(thread_curr->donee != THREAD_PTR_NULL) {
+     donate_priority(thread_curr, thread_curr->donee);
+    }
    
   // Make sure that the old_priority is updated only once
 }

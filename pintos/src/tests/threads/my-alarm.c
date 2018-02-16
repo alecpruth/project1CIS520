@@ -12,11 +12,11 @@ extern struct thread *blocked_queue[20];
 void
 test_my_alarm (void) 
 {
-  my_timer_sleep (1000);
+  timer_sleep (1000);
   printf("test_my_alarm(): Thread actually awaken at: %llu\n", timer_ticks());
-  my_timer_sleep (1000);
+  timer_sleep (1000);
   printf("test_my_alarm(): Thread actually awaken at: %llu\n", timer_ticks());
-  my_timer_sleep (1000);
+  timer_sleep (1000);
   printf("test_my_alarm(): Thread actually awaken at: %llu\n", timer_ticks());
   pass ();
 }

@@ -535,10 +535,10 @@ list_wakeup_ticks_insert(struct list *list, struct list_elem *el)
   
   for (e = list_begin (list); e != list_end (list); e = list_next (e)) {
     
-    existing = list_entry(e, struct thread, elem);
-    new = list_entry(el, struct thread, elem);
+    existing = list_entry(e, struct thread, wait_elem);
+    new = list_entry(el, struct thread, wait_elem);
     
-    if( new->wakeup_ticks > existing->wakeup_ticks )
+    if( new->wakeup_ticks < existing->wakeup_ticks )
         break;
    }
 

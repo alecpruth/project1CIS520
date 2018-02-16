@@ -95,27 +95,16 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
-  int64_t start = timer_ticks ();
-
-  ASSERT (intr_get_level () == INTR_ON);
-  
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
-}
-
-void
-my_timer_sleep (uint64_t ticks) 
-{
   
  int64_t start = timer_ticks ();
   
   struct thread *curr_thread = thread_current();
   curr_thread->wakeup_ticks = start+ticks;
-  curr_thread->waiting_for = TIME_EVENT;
+  //curr_thread->waiting_for = TIME_EVENT;
   
   //my_list_insert(blocked_queue, curr_thread);
 
-  printf("my_timer_sleep(): Current ticks is %llu\n", start);
+  //printf("my_timer_sleep(): Current ticks is %llu\n", start);
   //printf("my_timer_sleep(): Thread set to wake at: %llu\n", blocked_queue[0]->wakeup_ticks );
   
   ASSERT (intr_get_level () == INTR_ON);
@@ -219,14 +208,14 @@ timer_interrupt (struct intr_frame *args UNUSED)
            list_push_front(&blocked_list, el);
            break; 
         }
-            printf("timer_interrupt(): Thread ready to be unblocked\n");
+            //printf("timer_interrupt(): Thread ready to be unblocked\n");
             sema_up(&next_thread->timeevent_sema);
   }
   
       
   
   /*
-  
+  Used to build up small before implementing given list functions
   next_thread = my_list_pop(blocked_queue);
   if(next_thread != THREAD_PTR_NULL)
   {

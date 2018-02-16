@@ -1,0 +1,117 @@
+CIS 520 - Programming Project 1
+
+
+--- GROUP ---
+
+Travis Atchison <travis14@ksu.edu>
+Cre Moore
+Alec Ruth
+
+----Preliminaries----
+Throughout our project, we, along with several other groups,
+receieved a substantial amount of assistance from the TA Chandra.
+If you notice any similarities in coding style or functions between 
+our solution and other groups, this is most likely the reason why.
+
+		ALARM CLOCK
+		===========
+
+---- DATA STRUCTURES ----
+A1.
+timer.c
+	blocked_list
+		A list of semaphores that ensure that each thread waits until it is ready without busy waiting.
+	timer_sleep
+		Implements our new algorithm for having threads wait.
+	timer_interrupt
+		Wakes up the thread at the front of blocked_list, assuming that it has waited long enough.
+timer.h
+	ref to changes in timer.c
+alarm-wait.c
+	used for testing new functions
+tests.c & tests.h
+	ref to my-alarm.c and corresponding tests
+Makefile.tests
+	added my-alarm.c to src files
+
+---- ALGORITHMS ----
+A2. When timer_sleep is called, we get the current thread and calculate when we want this thread to wake up.
+Then, we temporarily disable interrupts to achieve atomicity. Then, we insert the thread into a list of waiting 
+threads, which is sorted in increasing order of wakeup time. Then, we create a new semaphore, assign it to the 
+thread's timeevent_sema field, and set the semaphore to down. Finally, we resotre the interrupts to normal and 
+allow things to continue.
+
+A3. Steps taken to minimize time in interrupt
+We minimize time in the interrupt by only checking list elements
+until we find one that should not wakeup. At this point, we immediately exit
+the while loop and leave the interrupt.
+
+---- SYNCHRONIZATION ----
+A4. what happens if multiple threads call timer_sleep at same time?
+
+A5. avoid race conditions if interrupt comes during timer_sleep
+In order to prevent race conditions here, we disable interrupts during the portion 
+where we insert elements into the waiting list. This ensures that there will not be any 
+race conditions that would mess up the order to the list.
+
+---- RATIONALE ----
+A6. Why this implementation over others?
+We considered just using block/unblock instead of semaphores, since it was
+simpler and, with a small number of threads, worked pretty much the same. However, 
+this changed greatly once we reached a much larger number of threads. Using semaphores 
+was simply the safest way we could get the threads to wait without holding up the 
+rest of the system.
+
+
+		PRIORITY
+		========
+
+---- DATA STRUCTURES ----
+B1.All changes
+synch.c
+	sema_down
+	lock_acquire?
+	lock_release?
+	
+synch.h
+thread.h
+	old_priority
+	wakeup_ticks
+	waiting_for
+	timeevent_sema
+	donor
+	donee
+thread.c
+	compare_priority?(implemented, not used)
+	thread_unblock
+	thread_yield
+	donate_priority
+	thread_set_priority
+	thread_get_priority
+list.c
+	list_priority_insert
+		Inserts the thread's list element into ready queue based on its priority. Higher priority = closer to the front.
+	list_wakeup_ticks_insert(in this section, or timer?)
+list.h
+	ref to list_priority_insert
+
+B2. strucutres/fields for tracking donations
+donor
+donee
+old_priority
+
+---- ALGORITHMS ----
+B3. We ensure that the highest priority thread wakes first by having the ready list
+be sorted in decreasing order of priority. When the OS goes to execute the next thread,
+it just pops the front element of the ready list, which will always be the element
+with the highest priority.
+
+B4.sequence of events when call to lock_aquire happens. how is nested donation handled?
+
+B5. lock_release procedure. what happens if thread has donated priority?
+
+---- SYNCHRONIZATION ----
+B6. describe potential race in thread_set_priority and how we avoid it
+
+---- RATIONALE ----
+B7.Why this design over others

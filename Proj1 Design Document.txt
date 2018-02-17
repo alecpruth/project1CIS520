@@ -4,12 +4,12 @@ CIS 520 - Programming Project 1
 --- GROUP ---
 
 Travis Atchison <travis14@ksu.edu>
-Cre Moore
-Alec Ruth
+Cre Moore       <camoore@ksu.edu>
+Alec Ruth       <alecpruth@ksu.edu>
 
 ----Preliminaries----
 Throughout our project, we, along with several other groups,
-receieved a substantial amount of assistance from the TA Chandra.
+received a substantial amount of assistance from the TA Chandra.
 If you notice any similarities in coding style or functions between 
 our solution and other groups, this is most likely the reason why.
 
@@ -38,7 +38,7 @@ Makefile.tests
 A2. When timer_sleep is called, we get the current thread and calculate when we want this thread to wake up.
 Then, we temporarily disable interrupts to achieve atomicity. Then, we insert the thread into a list of waiting 
 threads, which is sorted in increasing order of wakeup time. Then, we create a new semaphore, assign it to the 
-thread's timeevent_sema field, and set the semaphore to down. Finally, we resotre the interrupts to normal and 
+thread's timeevent_sema field, and set the semaphore to down. Finally, we restore the interrupts to normal and 
 allow things to continue.
 
 A3. Steps taken to minimize time in interrupt
@@ -95,7 +95,7 @@ list.c
 list.h
 	ref to list_priority_insert
 
-B2. strucutres/fields for tracking donations
+B2. structures/fields for tracking donations
 donor
 donee
 old_priority
@@ -106,7 +106,7 @@ be sorted in decreasing order of priority. When the OS goes to execute the next 
 it just pops the front element of the ready list, which will always be the element
 with the highest priority.
 
-B4.sequence of events when call to lock_aquire happens. how is nested donation handled?
+B4.sequence of events when call to lock_acquire happens. how is nested donation handled?
 
 B5. lock_release procedure. what happens if thread has donated priority?
 

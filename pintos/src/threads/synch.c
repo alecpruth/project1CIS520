@@ -112,13 +112,20 @@ void
 sema_up (struct semaphore *sema) 
 {
   enum intr_level old_level;
+  struct list_elem * max_elem;
 
   ASSERT (sema != NULL);
 
   old_level = intr_disable ();
-  if (!list_empty (&sema->waiters)) 
+  if (!list_empty (&sema->waiters)) {
+    list_sort(&sema->waiters, priority_sort, NULL);
+    max_elem = list_pop_front(&sema->waiters);
+    thread_unblock (list_entry (max_elem, struct thread, elem));  
+    /*
     thread_unblock (list_entry (list_pop_front (&sema->waiters),
                                 struct thread, elem));
+    */
+  }
   sema->value++;
   intr_set_level (old_level);
 }
@@ -226,6 +233,7 @@ my_lock_acquire (struct lock *lock)
   
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
+  //need to reset old priority and list_sort() the ready queue 
   // Possible site for priority donation: Moved priority donation down from above code did not break after
    
 }
@@ -258,14 +266,23 @@ lock_try_acquire (struct lock *lock)
 void
 lock_release (struct lock *lock) 
 {
+  struct thread * thread_curr; 
+  struct list_elem * next_donor_elem;
+  struct thread * next_donor_thread;   
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
   lock->holder = NULL;
+  thread_curr = thread_current();
   
-    if(thread_current()->donor != THREAD_PTR_NULL) {
-        thread_current()->donor->donee = THREAD_PTR_NULL;
-        thread_set_priority(thread_current()->old_priority);
+    while( !list_empty(&thread_curr->donor_list) ) {
+    // Assumption: every thread must release all the locks it is holding if it wants to acquire a new lock that is not available at this time
+        
+        // Navigate through all donors and remove this thread from their donee list
+        next_donor_elem = list_pop_front(&thread_curr->donor_list);
+        next_donor_thread = list_entry(next_donor_elem, struct thread, lock_elem);
+        list_remove(next_donor_elem);
+        thread_set_priority(thread_curr->old_priority);
     }
   
   sema_up (&lock->semaphore);

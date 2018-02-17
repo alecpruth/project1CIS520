@@ -102,8 +102,9 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
     struct list_elem wait_elem; 
-    struct thread *donor;               /* Pointer to the thread which donated the priority to this thread (if there is one) */
-    struct thread *donee;               /* Pointer to the thread to which this thread donated priority to (if there is one) */
+    struct list_elem lock_elem;
+    struct list donor_list;               /* List of all threads who donated the priority to this thread (if there is some) */
+    struct list donee_list;               /* List of all threads to whom this thread donated priority to (if there is some) */
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */

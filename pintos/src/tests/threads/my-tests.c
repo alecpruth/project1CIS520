@@ -46,13 +46,20 @@ void test_my_threads (void)
 
 void thread1()
 {
+static uint8_t once = 1;
+
     while(1) {
         printf("Thread 1 executing...\n");
         my_lock_acquire(&test_lock);
         printf("Thread 1 acquired the lock!\n");
-        timer_sleep(100);
+        if(once) {
+            printf("Thread 1 going to sleep zzzzzZ\n");
+            timer_sleep(100);
+            once = 0;
+        }
+        printf("Thread 1 trying to release the lock ...\n");
         lock_release(&test_lock);
-        break;
+        printf("Thread 1 released the lock!\n");
     }
 }
 

@@ -4,6 +4,7 @@
 #include <random.h>
 #include <stdio.h>
 #include <string.h>
+#include "lib/kernel/list.h"
 #include "threads/flags.h"
 #include "threads/interrupt.h"
 #include "threads/intr-stubs.h"
@@ -359,10 +360,15 @@ void
 thread_set_priority (int new_priority) 
 {
   struct thread * thread_curr = thread_current();
+  struct list_elem * donee_elem;
+  struct thread * donee_thread;
+  
   thread_curr->priority = new_priority;
   // Implement priority donation to all the donee thread
-   if(thread_curr->donee != THREAD_PTR_NULL) {
-     donate_priority(thread_curr, thread_curr->donee);
+  while(!list_empty(&thread_curr->donee_list)) {
+      donee_elem = list_pop_front(&thread_curr->donee_list);
+      donee_thread = list_entry(donee_elem, struct thread, lock_elem);
+      donate_priority(thread_curr, donee_thread);
     }
    
   // Make sure that the old_priority is updated only once
@@ -493,6 +499,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  list_init(&t->donor_list);
+  list_init(&t->donee_list);
 
   old_level = intr_disable ();
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -637,10 +645,14 @@ void donate_priority(struct thread *donor_thread, struct thread *donee_thread)
 {
     donee_thread->old_priority = donee_thread->priority;
     donee_thread->priority = donor_thread->priority;
-    donor_thread->donee = donee_thread;
-    donee_thread->donor = donor_thread;
-
-    // Check if the donee thread has the highest priority amongst the threads in the ready queue and execute it right away
+    
+    // Add the donee thread to the list of the donors in the donor thread
+    list_priority_insert(&donor_thread->donee_list, &donee_thread->lock_elem);
+    // Add the donor thread to the list of donees in the donee thread
+    list_priority_insert(&donee_thread->donor_list, &donor_thread->lock_elem);
+    // Check if the donee thread has the highest priority amongst the threads in the ready queue and execute it right away 
+    list_sort(&ready_list, priority_sort, NULL);
+     
     
 }
 

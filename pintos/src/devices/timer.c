@@ -23,7 +23,7 @@
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
 
-struct list blocked_list;
+struct list sema_list;
 
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
@@ -42,7 +42,7 @@ timer_init (void)
 {
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
-  list_init(&blocked_list);
+  list_init(&sema_list);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -100,18 +100,15 @@ timer_sleep (int64_t ticks)
   
   struct thread *curr_thread = thread_current();
   curr_thread->wakeup_ticks = start+ticks;
-  //curr_thread->waiting_for = TIME_EVENT;
   
-  //my_list_insert(blocked_queue, curr_thread);
-
   //printf("my_timer_sleep(): Current ticks is %llu\n", start);
-  //printf("my_timer_sleep(): Thread set to wake at: %llu\n", blocked_queue[0]->wakeup_ticks );
+  //printf("my_timer_sleep(): Thread set to wake at: %llu\n", curr_thread->wakeup_ticks );
   
   ASSERT (intr_get_level () == INTR_ON);
   
   enum intr_level old_level = intr_disable ();
   
-  list_wakeup_ticks_insert(&blocked_list, &curr_thread->wait_elem);
+  list_insert_wakeupticks(&sema_list, &curr_thread->wait_elem);
   sema_init(&curr_thread->timeevent_sema, 0);
   sema_down(&curr_thread->timeevent_sema);
   intr_set_level (old_level); 
@@ -192,24 +189,24 @@ timer_print_stats (void)
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
-  struct thread * next_thread;
-  struct list_elem * el;
+  struct thread * next;
+  struct list_elem * elem;
   
   ticks++;
   thread_tick ();
   
   
-  while( !list_empty(&blocked_list) ) {
-      el = list_pop_front(&blocked_list);
-      
-        next_thread = list_entry(el, struct thread, wait_elem);
+  while(!list_empty(&sema_list)) {
+    elem = list_pop_front(&sema_list);
+    next = list_entry(elem, struct thread, wait_elem);
         
-        if( ticks < next_thread->wakeup_ticks) {
-           list_push_front(&blocked_list, el);
-           break; 
-        }
-            //printf("timer_interrupt(): Thread ready to be unblocked\n");
-            sema_up(&next_thread->timeevent_sema);
+    if( ticks > next->wakeup_ticks)
+        sema_up(&next->timeevent_sema);
+    else { list_push_front(&sema_list, elem);
+           break; }
+    
+    //printf("timer_interrupt(): Thread ready to be unblocked\n");
+    
   }
   
       

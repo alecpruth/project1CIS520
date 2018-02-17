@@ -441,7 +441,7 @@ list_sort (struct list *list, list_less_func *less, void *aux)
 }
 
 
-bool priority_sort(struct list_elem *new, struct list_elem *exis, void *aux)
+bool priority_sorted(struct list_elem *new, struct list_elem *exis, void *aux)
 {
 struct thread * exis_thread;
 struct thread * new_thread;
@@ -469,7 +469,7 @@ list_insert_ordered (struct list *list, struct list_elem *elem,
 }
 
 void
-list_priority_insert(struct list *list, struct list_elem *el)
+list_insert_priority(struct list *list, struct list_elem *el)
 {
   struct list_elem *e;
   const struct thread *existing;
@@ -491,7 +491,7 @@ list_priority_insert(struct list *list, struct list_elem *el)
 }
 
 void
-list_wakeup_ticks_insert(struct list *list, struct list_elem *el)
+list_insert_wakeupticks(struct list *list, struct list_elem *el)
 {
   struct list_elem *e;
   const struct thread *existing;

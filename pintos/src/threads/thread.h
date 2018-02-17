@@ -93,7 +93,7 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
-    int old_priority;                   /* Keeps track of the priority assigned to the thread before someone donated priority to it */
+    int prev_priority;                   /* Keeps track of the  previously assigned priority before donation */
     struct list_elem allelem;           /* List element for all threads list. */
     int64_t wakeup_ticks;
     int8_t  waiting_for;
@@ -103,8 +103,8 @@ struct thread
     struct list_elem elem;              /* List element. */
     struct list_elem wait_elem; 
     struct list_elem lock_elem;
-    struct list donor_list;               /* List of all threads who donated the priority to this thread (if there is some) */
-    struct list donee_list;               /* List of all threads to whom this thread donated priority to (if there is some) */
+    struct list donors_list;               /* List of all threads who donated the priority to this thread (if there is some) */
+    struct list donees_list;               /* List of all threads to whom this thread donated priority to (if there is some) */
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -147,7 +147,7 @@ void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
-void donate_priority(struct thread *donor_thread, struct thread *donee_thread);
+void donate_priority(struct thread *d, struct thread *b);
 
 int thread_get_nice (void);
 void thread_set_nice (int);

@@ -19,7 +19,7 @@ our solution and other groups, this is most likely the reason why.
 ---- DATA STRUCTURES ----
 A1.
 timer.c
-	blocked_list
+	sema_list
 		A list of semaphores that ensure that each thread waits until it is ready without busy waiting.
 	timer_sleep
 		Implements our new algorithm for having threads wait.
@@ -75,12 +75,12 @@ synch.c
 	
 synch.h
 thread.h
-	old_priority
+	prev_priority
 	wakeup_ticks
 	waiting_for
 	timeevent_sema
-	donor
-	donee
+	donors_list
+	donees_list
 thread.c
 	compare_priority?(implemented, not used)
 	thread_unblock
@@ -89,15 +89,15 @@ thread.c
 	thread_set_priority
 	thread_get_priority
 list.c
-	list_priority_insert
+	list_insert_priority
 		Inserts the thread's list element into ready queue based on its priority. Higher priority = closer to the front.
-	list_wakeup_ticks_insert(in this section, or timer?)
+	list_insert_wakeupticks(in this section, or timer?)
 list.h
-	ref to list_priority_insert
+	ref to list_insert_priority
 
 B2. structures/fields for tracking donations
-donor
-donee
+donors
+donees
 old_priority
 
 ---- ALGORITHMS ----

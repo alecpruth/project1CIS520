@@ -259,7 +259,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_priority_insert(&ready_list, &t->elem);
+  list_insert_priority(&ready_list, &t->elem);
   //list_push_back (&ready_list, &t->elem);
   t->status = THREAD_READY;
   intr_set_level (old_level);
@@ -330,8 +330,7 @@ thread_yield (void)
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  if (cur != idle_thread) 
-     list_priority_insert(&ready_list, &cur->elem);
+  if (cur != idle_thread) list_insert_priority(&ready_list, &cur->elem);
     //list_push_back (&ready_list, &cur->elem);
   cur->status = THREAD_READY;
   schedule ();
@@ -365,13 +364,13 @@ thread_set_priority (int new_priority)
   
   thread_curr->priority = new_priority;
   // Implement priority donation to all the donee thread
-  while(!list_empty(&thread_curr->donee_list)) {
-      donee_elem = list_pop_front(&thread_curr->donee_list);
+  while(!list_empty(&thread_curr->donees_list)) {
+      donee_elem = list_pop_front(&thread_curr->donees_list);
       donee_thread = list_entry(donee_elem, struct thread, lock_elem);
       donate_priority(thread_curr, donee_thread);
     }
    
-  // Make sure that the old_priority is updated only once
+  // Make sure that the prev_priority is updated only once
 }
 
 /* Returns the current thread's priority. */
@@ -499,13 +498,13 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-  list_init(&t->donor_list);
-  list_init(&t->donee_list);
+  list_init(&t->donors_list);
+  list_init(&t->donees_list);
 
   old_level = intr_disable ();
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   //list_push_back (&all_list, &t->allelem);
-  list_priority_insert (&all_list, &t->allelem);
+  list_insert_priority (&all_list, &t->allelem);
   intr_set_level (old_level);
 }
 
@@ -641,17 +640,17 @@ allocate_tid (void)
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
 
 
-void donate_priority(struct thread *donor_thread, struct thread *donee_thread)
+void donate_priority(struct thread *donor, struct thread *donee)
 {
-    donee_thread->old_priority = donee_thread->priority;
-    donee_thread->priority = donor_thread->priority;
+    donee->prev_priority = donee->priority;
+    donee->priority = donor->priority;
     
     // Add the donee thread to the list of the donors in the donor thread
-    list_priority_insert(&donor_thread->donee_list, &donee_thread->lock_elem);
+    list_insert_priority(&donor->donees_list, &donee->lock_elem);
     // Add the donor thread to the list of donees in the donee thread
-    list_priority_insert(&donee_thread->donor_list, &donor_thread->lock_elem);
+    list_insert_priority(&donee->donors_list, &donor->lock_elem);
     // Check if the donee thread has the highest priority amongst the threads in the ready queue and execute it right away 
-    list_sort(&ready_list, priority_sort, NULL);
+    list_sort(&ready_list, priority_sorted, NULL);
      
     
 }

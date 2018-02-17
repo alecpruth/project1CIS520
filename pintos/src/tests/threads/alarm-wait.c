@@ -27,7 +27,7 @@ test_alarm_multiple (void)
 void
 test_alarm_mega (void) 
 {
-  test_sleep (5, 70);
+  test_sleep (3, 10);
 }
 
 /* Information about the test. */

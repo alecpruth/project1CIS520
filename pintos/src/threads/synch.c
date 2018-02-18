@@ -223,13 +223,13 @@ my_lock_acquire (struct lock *lock)
   //ASSERT( sema_try_down(&lock->semaphore) != 0);
   
   /* Check if the semaphore value is zero before even thinking about priority donation */
-  //if( lock->semaphore.value == 0) {
+  if( lock->semaphore.value == 0) {
       if(locked_thread != THREAD_PTR_NULL) {
         if(locked_thread->priority < curr_thread->priority) {
         donate_priority(curr_thread, locked_thread);
-       }
+        }
       }
-  //}
+  }
   
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();

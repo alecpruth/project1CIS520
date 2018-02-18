@@ -95,8 +95,8 @@ struct thread
     int priority;                       /* Priority. */
     int prev_priority;                   /* Keeps track of the  previously assigned priority before donation */
     struct list_elem allelem;           /* List element for all threads list. */
-    int64_t wakeup_ticks;
-    int8_t  waiting_for;
+    int64_t wakeup_ticks;                
+    int8_t  waiting_for;                /*  how long the thread will wait for */    
     struct semaphore timeevent_sema;
 
     /* Shared between thread.c and synch.c. */

@@ -101,6 +101,7 @@ timer_sleep (int64_t ticks)
   struct thread *curr_thread = thread_current();
   curr_thread->wakeup_ticks = start+ticks;
   
+  //used for debugging purposes 
   //printf("my_timer_sleep(): Current ticks is %llu\n", start);
   //printf("my_timer_sleep(): Thread set to wake at: %llu\n", curr_thread->wakeup_ticks );
   
@@ -213,6 +214,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   
   /*
   Used to build up small before implementing given list functions
+  * 
   next_thread = my_list_pop(blocked_queue);
   if(next_thread != THREAD_PTR_NULL)
   {

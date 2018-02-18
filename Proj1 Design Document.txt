@@ -143,5 +143,6 @@ priority to a different thread but then is set to a new priority shortly after, 
 thread's real priority. We solve this by having the thread also change the priorities of all its donee threads.
 
 ---- RATIONALE ----
-B7.Why this design over others
-
+B7. We decided to use this design because it was the easiest for us to understand. We did look at other design templates that 
+ahd been posted on GitHub for similar projects. However, we were not able to completely understand how they worked, so we 
+decided to use the simpler and easier to understand template that we implemented.

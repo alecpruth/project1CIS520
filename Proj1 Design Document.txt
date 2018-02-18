@@ -27,14 +27,23 @@ timer.c
 		Wakes up the thread at the front of blocked_list, assuming that it has waited long enough.
 timer.h
 	wakeup_ticks
+		If the thread is asleep, the tick time when it is allowed to wake up.
 	waiting_for
-	ref to changes in timer.c
-alarm-wait.c
-	used for testing new functions
+		The reason why the thread is waiting/sleeping. Used in timer_interrupt.
+	Reference to sema_list
+my-alarm.c
+	Used to test new timer_sleep in safe environment.
+my-tests.c
+	Used to test the priority scheduler and priority donation.
 tests.c & tests.h
-	ref to my-alarm.c and corresponding tests
+	References to my-alarm.c and my-tests.c and the corresponding tests.
 Makefile.tests
-	added my-alarm.c to src files
+	Added my-alarm.c and my-tests.c to src files.
+list.c
+	list_insert_wakeupticks
+		Inserts into the list based on the threads wakeup_ticks. Higher wakeup_ticks = closer to the front.
+list.h
+	Reference to list_insert_wakeupticks.
 
 ---- ALGORITHMS ----
 A2. When timer_sleep is called, we get the current thread and calculate when we want this thread to wake up.
@@ -70,7 +79,7 @@ rest of the system.
 		========
 
 ---- DATA STRUCTURES ----
-B1.All changes
+B1.
 synch.c
 	sema_down
 		Changed so that the waiters_list is sorted in increasing order of priority.
@@ -85,9 +94,10 @@ thread.h
 		Keeps track of the thread's priority before donation.
 	timeevent_sema
 	donors_list
+		Keep track of all the threads that have donated priority to this thread.
 	donees_list
+		Keeps track of all the threads that this thread has donated priority to.
 thread.c
-	compare_priority?(implemented, not used)
 	thread_unblock
 	thread_yield
 	donate_priority
@@ -96,11 +106,12 @@ thread.c
 list.c
 	list_insert_priority
 		Inserts the thread's list element into ready queue based on its priority. Higher priority = closer to the front.
-	list_insert_wakeupticks(in this section, or timer?)
+	priority_sorted
+		Compares the priority values of two threads, then returns if the first thread has a greatere priority or not.
 list.h
-	ref to list_insert_priority
+	Reference to list_insert_priority
 
-B2. structures/fields for tracking donations
+B2. 
 donors_list
 donees_list
 prev_priority

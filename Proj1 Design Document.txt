@@ -33,12 +33,10 @@ timer.h
 	Reference to sema_list
 my-alarm.c
 	Used to test new timer_sleep in safe environment.
-my-tests.c
-	Used to test the priority scheduler and priority donation.
 tests.c & tests.h
-	References to my-alarm.c and my-tests.c and the corresponding tests.
+	References to my-alarm.c.
 Makefile.tests
-	Added my-alarm.c and my-tests.c to src files.
+	Added my-alarm.c to src files.
 list.c
 	list_insert_wakeupticks
 		Inserts into the list based on the threads wakeup_ticks. Higher wakeup_ticks = closer to the front.
@@ -110,6 +108,12 @@ list.c
 		Compares the priority values of two threads, then returns if the first thread has a greatere priority or not.
 list.h
 	Reference to list_insert_priority
+my-tests.c
+	Used to test the priority scheduler and priority donation.
+tests.c & tests.h
+	References to my-tests.c.
+Makefile.tests
+	Added my-tests.c to src files.
 
 B2. 
 donors_list

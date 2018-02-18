@@ -440,7 +440,7 @@ list_sort (struct list *list, list_less_func *less, void *aux)
   ASSERT (is_sorted (list_begin (list), list_end (list), less, aux));
 }
 
-
+/*
 bool priority_sorted(struct list_elem *new, struct list_elem *exis, void *aux)
 {
 struct thread * exis_thread;
@@ -450,6 +450,18 @@ struct thread * new_thread;
     exis_thread = list_entry(exis, struct thread, elem);
 
     return(new_thread->priority > exis_thread->priority);
+}*/
+
+// possible implementation to find priority, have not used 
+bool 
+priority_sorted(struct list_elem *a, struct list_elem *b, void *aux){
+    struct thread *threadA = list_entry(a, struct thread, elem);
+    struct thread *threadB = list_entry(b, struct thread, elem);
+    if (threadA -> priority > threadB->priority)
+    {
+        return true;
+    }
+    return false;
 }
 
 void

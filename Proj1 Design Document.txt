@@ -26,13 +26,22 @@ timer.c
 	timer_interrupt
 		Wakes up the thread at the front of blocked_list, assuming that it has waited long enough.
 timer.h
-	ref to changes in timer.c
-alarm-wait.c
-	used for testing new functions
+	wakeup_ticks
+		If the thread is asleep, the tick time when it is allowed to wake up.
+	waiting_for
+		The reason why the thread is waiting/sleeping. Used in timer_interrupt.
+	Reference to sema_list
+my-alarm.c
+	Used to test new timer_sleep in safe environment.
 tests.c & tests.h
-	ref to my-alarm.c and corresponding tests
+	References to my-alarm.c.
 Makefile.tests
-	added my-alarm.c to src files
+	Added my-alarm.c to src files.
+list.c
+	list_insert_wakeupticks
+		Inserts into the list based on the threads wakeup_ticks. Higher wakeup_ticks = closer to the front.
+list.h
+	Reference to list_insert_wakeupticks.
 
 ---- ALGORITHMS ----
 A2. When timer_sleep is called, we get the current thread and calculate when we want this thread to wake up.
@@ -47,10 +56,11 @@ until we find one that should not wakeup. At this point, we immediately exit
 the while loop and leave the interrupt.
 
 ---- SYNCHRONIZATION ----
-A4. what happens if multiple threads call timer_sleep at same time?
+A4. We are not too worried about multiple threads calling timer_sleep at the same time. The only
+issue that may arise there is when the threads are inserted into the waiting_list, but our scheduler 
+ensures that each thread is placed in the list in the correct order.
 
-A5. avoid race conditions if interrupt comes during timer_sleep
-In order to prevent race conditions here, we disable interrupts during the portion 
+A5. In order to prevent race conditions, we disable interrupts during the portion 
 where we insert elements into the waiting list. This ensures that there will not be any 
 race conditions that would mess up the order to the list.
 
@@ -67,22 +77,25 @@ rest of the system.
 		========
 
 ---- DATA STRUCTURES ----
-B1.All changes
+B1.
 synch.c
 	sema_down
-	lock_acquire?
-	lock_release?
-	
+		Changed so that the waiters_list is sorted in increasing order of priority.
+	my_lock_acquire
+		Behaves like lock_acquire, except that it also handles priority donation.
+	lock_release
+		Changed to reset to old priority if current priority was donated.
 synch.h
+	Added a reference to my_lock_acquire.
 thread.h
 	prev_priority
-	wakeup_ticks
-	waiting_for
+		Keeps track of the thread's priority before donation.
 	timeevent_sema
 	donors_list
+		Keep track of all the threads that have donated priority to this thread.
 	donees_list
+		Keeps track of all the threads that this thread has donated priority to.
 thread.c
-	compare_priority?(implemented, not used)
 	thread_unblock
 	thread_yield
 	donate_priority
@@ -91,14 +104,21 @@ thread.c
 list.c
 	list_insert_priority
 		Inserts the thread's list element into ready queue based on its priority. Higher priority = closer to the front.
-	list_insert_wakeupticks(in this section, or timer?)
+	priority_sorted
+		Compares the priority values of two threads, then returns if the first thread has a greatere priority or not.
 list.h
-	ref to list_insert_priority
+	Reference to list_insert_priority
+my-tests.c
+	Used to test the priority scheduler and priority donation.
+tests.c & tests.h
+	References to my-tests.c.
+Makefile.tests
+	Added my-tests.c to src files.
 
-B2. structures/fields for tracking donations
-donors
-donees
-old_priority
+B2. 
+donors_list
+donees_list
+prev_priority
 
 ---- ALGORITHMS ----
 B3. We ensure that the highest priority thread wakes first by having the ready list
@@ -106,12 +126,22 @@ be sorted in decreasing order of priority. When the OS goes to execute the next 
 it just pops the front element of the ready list, which will always be the element
 with the highest priority.
 
-B4.sequence of events when call to lock_acquire happens. how is nested donation handled?
+B4. First, we identify the current thread and the thread that currently holds the lock. Then, if the 
+lock is being held by another thread, we check to see if the locked_thread's priority is lower than 
+the current thread's priority. In that case, the current thread donates it priority to the locked thread. 
+Nested thread donations are handled with the donor/donee lists in the threads. After the situation of priority 
+is settled, we call sema_down on the lock and then grab it once it becomes available.
 
-B5. lock_release procedure. what happens if thread has donated priority?
+B5. The lock_release procedure is basically identical to the original procedure, except in the case of the thread 
+having donated priority. In that case, we reset the thread's priority back to its previous value and remove the 
+donor thread from the donors_list. We don't remove the current thread from the donor thread's donees_list, but 
+that isn't a problem since we really just use that to keep track of which thread's were donated to.
 
 ---- SYNCHRONIZATION ----
-B6. describe potential race in thread_set_priority and how we avoid it
+B6. A potential race condition in thread_set_priority comes from a thread donating its priority. If a thread donate's its
+priority to a different thread but then is set to a new priority shortly after, then the donee thread will not have the donor 
+thread's real priority. We solve this by having the thread also change the priorities of all its donee threads.
 
 ---- RATIONALE ----
 B7.Why this design over others
+
